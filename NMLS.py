@@ -183,10 +183,15 @@
 
 
 
+
+
+
+
 # import time
 # from DrissionPage import ChromiumPage, ChromiumOptions
 # import random
 # import os
+# from pathlib import Path
 # from PIL import Image
 # import pytesseract    #
 
@@ -216,79 +221,12 @@
 
 #     print(f"✅ CAPTCHA image saved in the same folder as NMLS.py:\n{save_path}")
 
+#     # Locate the file input and upload an image
+#     image_path = str(Path("D:\drission page\NMLS Consumer Access\captcha_image.png").resolve())  # Replace with your image path
+#     file_input = driver.ele('tag:input', attr='type=file')
+#     file_input.input(image_path)
+
+#     # Wait for results to load
+#     time.sleep(random.uniform(10, 15))
 
 
-#     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
-#     # Read the image and extract text
-#     img = Image.open(save_path)
-#     text = pytesseract.image_to_string(img)
-
-#     print("🧠 Extracted text:", text)
-# else:
-#     print("❌ CAPTCHA image not found on the page.")
-
-
-
-import time
-from DrissionPage import ChromiumPage, ChromiumOptions
-import random
-import os
-from PIL import Image, ImageFilter, ImageEnhance
-import pytesseract
-
-# Setup DrissionPage
-options = ChromiumOptions()
-options.set_paths(browser_path="C:/Program Files/Google/Chrome/Application/chrome.exe")
-options.headless(False)
-
-driver = ChromiumPage(options)
-driver.get("https://www.nmlsconsumeraccess.org/TuringTestPage.aspx?ReturnUrl=/EntityDetails.aspx/INDIVIDUAL/2725469")
-
-time.sleep(random.uniform(7, 10))  # give the page time to load
-
-# Locate the CAPTCHA image element
-captcha_element = driver.ele('css:img[id*="CaptchaImage"]')
-
-if captcha_element:
-    # Get the folder path where this script (NMLS.py) is located
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Build the save path in the same folder
-    save_path = os.path.join(script_dir, "captcha_image.png")
-
-    # Save the CAPTCHA screenshot
-    captcha_element.get_screenshot(save_path)
-    print(f"✅ CAPTCHA image saved in the same folder as NMLS.py:\n{save_path}")
-
-    # Configure pytesseract path
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
-    # ---- Image Preprocessing ----
-    img = Image.open(save_path)
-
-    # 1️⃣ Convert to grayscale
-    img = img.convert("L")
-
-    # 2️⃣ Increase contrast
-    enhancer = ImageEnhance.Contrast(img)
-    img = enhancer.enhance(2)  # higher contrast improves OCR
-
-    # 3️⃣ Apply threshold to make image black & white
-    threshold = 120
-    img = img.point(lambda x: 255 if x > threshold else 0)
-
-    # 4️⃣ Smooth small noise
-    img = img.filter(ImageFilter.MedianFilter())
-
-    # Optional: save cleaned version
-    clean_path = os.path.join(script_dir, "cleaned_captcha.png")
-    img.save(clean_path)
-    print(f"🧹 Cleaned image saved as: {clean_path}")
-
-    # ---- OCR Step ----
-    text = pytesseract.image_to_string(img)
-    print("🧠 Extracted text after preprocessing:", text.strip())
-
-else:
-    print("❌ CAPTCHA image not found on the page.")
